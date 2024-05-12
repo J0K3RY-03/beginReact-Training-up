@@ -4,11 +4,10 @@ import { Plus, Trash } from "lucide-react";
 import {useState} from "react";
 import {cn} from "@/src/utils/cn";
 
-export const Todos = () => {
+const useTodos = () => {
   const [todos, setTodos] = useState([]);
-  const [todo, setTodo] = useState("");
 
-  const addTodo = () => {
+  const addTodo = (todo) => {
     const newTodo = {
       id: Date.now(),
       text: todo,
@@ -17,7 +16,6 @@ export const Todos = () => {
 
     const newTodos = [...todos, newTodo];
     setTodos(newTodos);
-    setTodo('');
   }
 
   const updateTodo = (id, newTodo) => {
@@ -31,6 +29,24 @@ export const Todos = () => {
   const removeTodo = (id) => {
     const newTodos = todos.filter((todo) => todo.id !== id);
     setTodos(newTodos);
+  }
+
+  return {
+    todos,
+    addTodo,
+    updateTodo,
+    removeTodo
+  };
+}
+
+export const Todos = () => {
+  const [todo, setTodo] = useState("");
+  const {todos, addTodo, updateTodo, removeTodo} = useTodos();
+  const [editingID, setEditingID] = useState(null);
+
+  const handleAddTodo = () => {
+    addTodo(todo);
+    setTodo("");
   }
 
   return (
@@ -49,11 +65,11 @@ export const Todos = () => {
             value={todo} onChange={(e) => setTodo(e.target.value)}
                    onKeyDown={(e) => {
                      if (e.key === "Enter") {
-                       addTodo();
+                       handleAddTodo();
                      }
                    }}/>
           </label>
-          <button className="btn btn-primary" onClick={() => addTodo()}>
+          <button className="btn btn-primary" onClick={() => handleAddTodo()}>
             <Plus size={22} />
           </button>
         </div>
