@@ -72,93 +72,22 @@ const useTodos = () => {
 }
 
 export const Todos = () => {
-  const [todo, setTodo] = useState("");
   const {todos, addTodo, updateTodo, removeTodo} = useTodos();
-  const [editingID, setEditingID] = useState(null);
-
-  const handleAddTodo = () => {
-    addTodo(todo);
-    setTodo("");
-  }
 
   return (
     <div className="card w-full max-w-md border border-base-300 bg-base-200 shadow-xl">
       <div className="card-body">
         <h2 className="card-title">Todos</h2>
-        <div className="flex w-full items-center gap-2">
-          <div className="input input-bordered flex flex-1 items-center gap-2">
-            <input
-              type="checkbox"
-              checked={false}
-              className="checkbox checkbox-sm"
-            />
-            {/* 🦁 Ajoute un état "Todo" et contrôle l'input */}
-            <input type="text" className="grow" placeholder="Some task"
-            value={todo} onChange={(e) => setTodo(e.target.value)}
-                   onKeyDown={(e) => {
-                     if (e.key === "Enter") {
-                       handleAddTodo();
-                     }
-                   }}/>
-          </div>
-          <button className="btn btn-primary" onClick={() => handleAddTodo()}>
-            <Plus size={22} />
-          </button>
-        </div>
+          <TodoForm addTodo={addTodo}/>
         <div className="divider">List</div>
         <ul className="space-y-2">
           {todos.map((todo) =>
-              <li className="flex w-full items-center gap-2"
-                  key={todo.id}>
-                <div className={cn("input flex flex-1 items-center gap-2", {
-                  "input-bordered": editingID === todo.id,
-                })}>
-                  <input type="checkbox" className="checkbox checkbox-sm"
-                  onChange={() => {
-                    /*Lorsque l'événement onChange est déclenché, cette ligne inverse
-                     l'état de complétude de la tâche actuelle. Si todo.completed est true, newCompleted deviendra false, et vice versa.
-                     */
-                    const newCompleted = !todo.completed;
-                    /*Mise à jour de la tâche :*/
-                    /*Ensuite, cette ligne appelle la fonction updateTodo, passant
-                     l'identifiant de la tâche actuelle todo.id et un nouvel objet de todo. Cet objet est construit en copiant toutes les propriétés de la tâche actuelle (...todo) et en remplaçant la propriété completed par la nouvelle valeur newCompleted.
-                     */
-                    updateTodo(todo.id, {
-                      ...todo,
-                      completed: newCompleted
-                    })
-                  }}
-                  checked={todo.completed}/>
-                  {editingID === todo.id ? (
-                      <input
-                          ref={(r) => r?.focus()}
-                          onBlur={(e) => {
-                            const newValue = e.target.value;
-                            updateTodo(todo.id, {
-                              ...todo,
-                              text: newValue,
-                            });
-                            setEditingID(null);
-                          }}
-                          defaultValue={todo.text}
-                      />
-                  ) : (
-                      <p
-                          onClick={() => {
-                            setEditingID(todo.id);
-                          }}
-                          className={cn({
-                            "line-through text-neutral-content": todo.completed,
-                          })}
-                      >
-                        {todo.text}
-                      </p>
-                  )}
-                </div>
-                <button className="btn btn-ghost" onClick={() => removeTodo(todo.id)}>
-                  <Trash size={16} />
-                </button>
-              </li>
+              <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  updateTodo={updateTodo}
+                  removeTodo={removeTodo}
+              />
           )}
           {todos.length === 0 ? (
               <p className="text-neutral-content">Empty</p>
@@ -169,10 +98,100 @@ export const Todos = () => {
   );
 };
 
-export default function App() {
+const TodoItem = ({todo, updateTodo, removeTodo}) => {
+  const [editingID, setEditingID] = useState(null);
+
   return (
-    <div className="flex w-full justify-center">
-      <Todos />
-    </div>
-  );
+      <li className="flex w-full items-center gap-2"
+          key={todo.id}>
+        <div className={cn("input flex flex-1 items-center gap-2", {
+          "input-bordered": editingID === todo.id,
+        })}>
+          <input type="checkbox" className="checkbox checkbox-sm"
+                 onChange={() => {
+                   /*Lorsque l'événement onChange est déclenché, cette ligne inverse
+                    l'état de complétude de la tâche actuelle. Si todo.completed est true, newCompleted deviendra false, et vice versa.
+                    */
+                   const newCompleted = !todo.completed;
+                   /*Mise à jour de la tâche :*/
+                   /*Ensuite, cette ligne appelle la fonction updateTodo, passant
+                    l'identifiant de la tâche actuelle todo.id et un nouvel objet de todo. Cet objet est construit en copiant toutes les propriétés de la tâche actuelle (...todo) et en remplaçant la propriété completed par la nouvelle valeur newCompleted.
+                    */
+                   updateTodo(todo.id, {
+                     ...todo,
+                     completed: newCompleted
+                   })
+                 }}
+                 checked={todo.completed}/>
+          {editingID === todo.id ? (
+              <input
+                  ref={(r) => r?.focus()}
+                  onBlur={(e) => {
+                    const newValue = e.target.value;
+                    updateTodo(todo.id, {
+                      ...todo,
+                      text: newValue,
+                    });
+                    setEditingID(null);
+                  }}
+                  defaultValue={todo.text}
+              />
+          ) : (
+              <p
+                  onClick={() => {
+                    setEditingID(todo.id);
+                  }}
+                  className={cn({
+                    "line-through text-neutral-content": todo.completed,
+                  })}
+              >
+                {todo.text}
+              </p>
+          )}
+        </div>
+        <button className="btn btn-ghost" onClick={() => removeTodo(todo.id)}>
+          <Trash size={16}/>
+        </button>
+      </li>
+  )
+}
+
+const TodoForm = ({addTodo}) => {
+    const [todo, setTodo] = useState("");
+
+    const handleAddTodo = () => {
+        addTodo(todo);
+        setTodo("");
+    }
+
+    return (
+        <div className="flex w-full items-center gap-2">
+            <div className="input input-bordered flex flex-1 items-center gap-2">
+                <input
+                    type="checkbox"
+                    checked={false}
+                    className="checkbox checkbox-sm"
+                />
+                {/* 🦁 Ajoute un état "Todo" et contrôle l'input */}
+                <input type="text" className="grow" placeholder="Some task"
+                       value={todo} onChange={(e) => setTodo(e.target.value)}
+                       onKeyDown={(e) => {
+                           if (e.key === "Enter") {
+                               handleAddTodo();
+                           }
+                       }}/>
+            </div>
+            <button className="btn btn-primary" onClick={() => handleAddTodo()}>
+                <Plus size={22}/>
+            </button>
+        </div>
+    )
+}
+
+export default function App() {
+    return (
+        <div className="flex w-full justify-center">
+            <Todos/>
+        </div>
+    );
 }
