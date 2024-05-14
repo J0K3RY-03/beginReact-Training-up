@@ -1,29 +1,35 @@
 "use client";
-
+import { useForm, SubmitHandler } from "react-hook-form"
 import { Mail, User2 } from "lucide-react";
-import { useState } from "react";
+import { useState} from "react";
 
 // eslint-disable-next-line no-unused-vars
 export const LoginForm = ({ onSubmit }) => {
-  // 🦁 Utilise 2 states pour le mail et le name
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm();
 
-  // 🦁 Crée une méthode "handleSubmit" qui sera passée au `onSubmit` de `form`
-  // - Commence par empêcher le comportement par défaut du formulaire
-  // - Puis appelle `onSubmit` avec un objet contenant le mail et le name
+    const formSubmit = (data) => {
+        onSubmit(data);
+    }
+
+
   return (
-    // Ajoute la props `onSubmit`
-    <form className="flex flex-col gap-2">
+    <form onSubmit={handleSubmit(formSubmit)} className="flex flex-col gap-2">
       <label className="input input-bordered flex items-center gap-2">
         <Mail size={16} />
-        {/* 🦁 Contrôle cette input */}
-        <input type="text" className="grow" placeholder="email" />
+        <input type="text" className="grow" placeholder="email" {...register("email")}/>
       </label>
       <label className="input input-bordered flex items-center gap-2">
         <User2 size={16} />
-        {/* 🦁 Contrôle cette input */}
-        <input type="text" className="grow" placeholder="user" />
+        <input type="text" className="grow" placeholder="user" {...register("name", {required: true})} />
       </label>
-      <button type="button" className="btn btn-primary">
+        {
+            errors.name && <span>This field is required</span>
+        }
+      <button type="text" className="btn btn-primary">
         Submit
       </button>
     </form>
